@@ -1,0 +1,27 @@
+Once the events are ingested into the table, need to generate daily/weekly/monthly reports					
+Top 10 events and its count for a given date					
+Returning users					
+Active users					
+Churn					
+
+->val dailyReportDF = deltaTable
+  .select("EventDate", "EventName")
+  .groupBy("EventDate", "EventName")
+  .count()
+  .orderBy(desc("count"))
+  .limit(10)
+
+->val returningUsersDF = deltaTable
+  .groupBy("user_id")
+  .agg(countDistinct("EventDate").alias("numDays"))
+  .filter("numDays > 1")
+
+->val activeUsersDF = deltaTable
+  .groupBy("user_id")
+  .agg(countDistinct("EventDate").alias("numDays"))
+  .filter("numDays >= 7")
+
+->val churnUsersDF = deltaTable
+  .groupBy("user_id")
+  .agg(countDistinct("EventDate").alias("numDays"))
+  .filter("numDays = 1")
